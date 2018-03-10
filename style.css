@@ -50,3 +50,10 @@
         width: 25%;
       }
     }
+    
+    #map,
+    body,
+    html {
+        width:auto; 
+        height:auto;
+    }
