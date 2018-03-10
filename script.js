@@ -132,7 +132,7 @@ wrapper.append("g")
 	.attr("text-anchor", "end")
 	.style("font-size", (mobileScreen ? 8 : 12) + "px")
 	.attr("transform", "translate(" + width + "," + (height - 10) + ")")
-	.text("GDP per capita [US $] - Note the logarithmic scale");
+	.text("Admission Rate");
 
 //Set up y axis label
 wrapper.append("g")
@@ -141,7 +141,7 @@ wrapper.append("g")
 	.attr("text-anchor", "end")
 	.style("font-size", (mobileScreen ? 8 : 12) + "px")
 	.attr("transform", "translate(18, 0) rotate(-90)")
-	.text("Life expectancy");
+	.text("Average SAT Score");
 	
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////// Create the Legend////////////////////////////////
@@ -194,10 +194,10 @@ if (!mobileScreen) {
 		  .text(function(d,i) { return color.domain()[i]; });  
 
 	//Create g element for bubble size legend
-	var bubbleSizeLegend = legendWrapper.append("g")
-							.attr("transform", "translate(" + (legendWidth/2 - 30) + "," + (color.domain().length*rowHeight + 20) +")");
+	//var bubbleSizeLegend = legendWrapper.append("g")
+	//						.attr("transform", "translate(" + (legendWidth/2 - 30) + "," + (color.domain().length*rowHeight + 20) +")");
 	//Draw the bubble size legend
-	bubbleLegend(bubbleSizeLegend, rScale, legendSizes = [1e11,3e12,1e13], legendName = "GDP (Billion $)");		
+	//bubbleLegend(bubbleSizeLegend, rScale, legendSizes = [1e11,3e12,1e13], legendName = "GDP (Billion $)");		
 }//if !mobileScreen
 else {
 	d3.select("#legend").style("display","none");
@@ -207,80 +207,80 @@ else {
 /////////////////// Bubble Legend ////////////////////
 //////////////////////////////////////////////////////
 
-function bubbleLegend(wrapperVar, scale, sizes, titleName) {
+//function bubbleLegend(wrapperVar, scale, sizes, titleName) {
 
-	var legendSize1 = sizes[0],
-		legendSize2 = sizes[1],
-		legendSize3 = sizes[2],
-		legendCenter = 0,
-		legendBottom = 50,
-		legendLineLength = 25,
-		textPadding = 5,
-		numFormat = d3.format(",");
+//	var legendSize1 = sizes[0],
+//		legendSize2 = sizes[1],
+//		legendSize3 = sizes[2],
+//		legendCenter = 0,
+//		legendBottom = 50,
+//		legendLineLength = 25,
+//		textPadding = 5,
+//		numFormat = d3.format(",");
 	
-	wrapperVar.append("text")
-		.attr("class","legendTitle")
-		.attr("transform", "translate(" + legendCenter + "," + 0 + ")")
-		.attr("x", 0 + "px")
-		.attr("y", 0 + "px")
-		.attr("dy", "1em")
-		.text(titleName);
+//	wrapperVar.append("text")
+//		.attr("class","legendTitle")
+//		.attr("transform", "translate(" + legendCenter + "," + 0 + ")")
+//		.attr("x", 0 + "px")
+//		.attr("y", 0 + "px")
+//		.attr("dy", "1em")
+//		.text(titleName);
+//		
+//	wrapperVar.append("circle")
+//        .attr('r', scale(legendSize1))
+//        .attr('class',"legendCircle")
+//        .attr('cx', legendCenter)
+//        .attr('cy', (legendBottom-scale(legendSize1)));
+ //   wrapperVar.append("circle")
+//        .attr('r', scale(legendSize2))
+//        .attr('class',"legendCircle")
+//        .attr('cx', legendCenter)
+ //       .attr('cy', (legendBottom-scale(legendSize2)));
+//    wrapperVar.append("circle")
+//        .attr('r', scale(legendSize3))
+//        .attr('class',"legendCircle")
+//        .attr('cx', legendCenter)
+//        .attr('cy', (legendBottom-scale(legendSize3)));
 		
-	wrapperVar.append("circle")
-        .attr('r', scale(legendSize1))
-        .attr('class',"legendCircle")
-        .attr('cx', legendCenter)
-        .attr('cy', (legendBottom-scale(legendSize1)));
-    wrapperVar.append("circle")
-        .attr('r', scale(legendSize2))
-        .attr('class',"legendCircle")
-        .attr('cx', legendCenter)
-        .attr('cy', (legendBottom-scale(legendSize2)));
-    wrapperVar.append("circle")
-        .attr('r', scale(legendSize3))
-        .attr('class',"legendCircle")
-        .attr('cx', legendCenter)
-        .attr('cy', (legendBottom-scale(legendSize3)));
+//	wrapperVar.append("line")
+//        .attr('class',"legendLine")
+//        .attr('x1', legendCenter)
+//        .attr('y1', (legendBottom-2*scale(legendSize1)))
+//		.attr('x2', (legendCenter + legendLineLength))
+//        .attr('y2', (legendBottom-2*scale(legendSize1)));	
+//	wrapperVar.append("line")
+//        .attr('class',"legendLine")
+//        .attr('x1', legendCenter)
+//        .attr('y1', (legendBottom-2*scale(legendSize2)))
+//		.attr('x2', (legendCenter + legendLineLength))
+//        .attr('y2', (legendBottom-2*scale(legendSize2)));
+//	wrapperVar.append("line")
+//        .attr('class',"legendLine")
+//        .attr('x1', legendCenter)
+//        .attr('y1', (legendBottom-2*scale(legendSize3)))
+//		.attr('x2', (legendCenter + legendLineLength))
+//        .attr('y2', (legendBottom-2*scale(legendSize3)));
 		
-	wrapperVar.append("line")
-        .attr('class',"legendLine")
-        .attr('x1', legendCenter)
-        .attr('y1', (legendBottom-2*scale(legendSize1)))
-		.attr('x2', (legendCenter + legendLineLength))
-        .attr('y2', (legendBottom-2*scale(legendSize1)));	
-	wrapperVar.append("line")
-        .attr('class',"legendLine")
-        .attr('x1', legendCenter)
-        .attr('y1', (legendBottom-2*scale(legendSize2)))
-		.attr('x2', (legendCenter + legendLineLength))
-        .attr('y2', (legendBottom-2*scale(legendSize2)));
-	wrapperVar.append("line")
-        .attr('class',"legendLine")
-        .attr('x1', legendCenter)
-        .attr('y1', (legendBottom-2*scale(legendSize3)))
-		.attr('x2', (legendCenter + legendLineLength))
-        .attr('y2', (legendBottom-2*scale(legendSize3)));
+//	wrapperVar.append("text")
+//        .attr('class',"legendText")
+//        .attr('x', (legendCenter + legendLineLength + textPadding))
+//        .attr('y', (legendBottom-2*scale(legendSize1)))
+//		.attr('dy', '0.25em')
+//		.text("$ " + numFormat(Math.round(legendSize1/1e9)) + " B");
+//	wrapperVar.append("text")
+//        .attr('class',"legendText")
+//        .attr('x', (legendCenter + legendLineLength + textPadding))
+//        .attr('y', (legendBottom-2*scale(legendSize2)))
+//		.attr('dy', '0.25em')
+//		.text("$ " + numFormat(Math.round(legendSize2/1e9)) + " B");
+//	wrapperVar.append("text")
+//        .attr('class',"legendText")
+//        .attr('x', (legendCenter + legendLineLength + textPadding))
+//        .attr('y', (legendBottom-2*scale(legendSize3)))
+//		.attr('dy', '0.25em')
+//		.text("$ " + numFormat(Math.round(legendSize3/1e9)) + " B");
 		
-	wrapperVar.append("text")
-        .attr('class',"legendText")
-        .attr('x', (legendCenter + legendLineLength + textPadding))
-        .attr('y', (legendBottom-2*scale(legendSize1)))
-		.attr('dy', '0.25em')
-		.text("$ " + numFormat(Math.round(legendSize1/1e9)) + " B");
-	wrapperVar.append("text")
-        .attr('class',"legendText")
-        .attr('x', (legendCenter + legendLineLength + textPadding))
-        .attr('y', (legendBottom-2*scale(legendSize2)))
-		.attr('dy', '0.25em')
-		.text("$ " + numFormat(Math.round(legendSize2/1e9)) + " B");
-	wrapperVar.append("text")
-        .attr('class',"legendText")
-        .attr('x', (legendCenter + legendLineLength + textPadding))
-        .attr('y', (legendBottom-2*scale(legendSize3)))
-		.attr('dy', '0.25em')
-		.text("$ " + numFormat(Math.round(legendSize3/1e9)) + " B");
-		
-}//bubbleLegend
+//}//bubbleLegend
 
 ///////////////////////////////////////////////////////////////////////////
 //////////////////// Hover function for the legend ////////////////////////

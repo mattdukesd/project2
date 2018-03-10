@@ -55,5 +55,12 @@
     body,
     html {
         width:auto; 
-        height:auto;
+        height:300px;
+    }
+
+    .chart2,
+    body,
+    html {
+        width:auto;
+        height:200px;
     }
