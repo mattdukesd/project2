@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		School Data
+	</title>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400,300' rel='stylesheet' type='text/css'>
+
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+  	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+
+</head>
+<body>
+	<font face="Arial">
+
+
+<style type="text/css">
+.tooltip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+.tooltip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+.tooltip.n:after {
+    margin: -2px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+</style>
+
+	<div class="container">
+		<div class="jumbotron text-center">
+			<h1>University Scorecard</h1>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-9">
+					<div class="chart"></div>
+				</div>
+				<div class="col-md-3">
+					<div class="slidecontainer">
+					<input type="range" min="2010" max="2015" value="2015" class="slider" id="myRange1">
+					<p>Year: <span id="demo1"></span></p>
+				</div>
+
+				<div class="slidecontainer">
+					<input type="range" min="1" max="10" value="5" class="slider" id="myRange2">
+					<p>Region: <span id="demo2"></span></p>
+				</div>
+
+				<div class="slidecontainer">
+					<input type="range" min="10" max="100" value="10" class="slider" id="myRange3">
+					<p>Top: <span id="demo3"></span></p>
+				</div>
+
+                <script type="text/javascript">
+
+                	var year = 2015;
+                	var regionSelect = 5;
+                	var topSAT = 10;
+                	var SATval = [];
+                	var testVal;
+                	var i;
+                	var j;
+                	var accOutput = [];
+                	var toolTip;
+                	var instName;
+                	var school2;
+                	var SAT2;
+                	var outputString;
+
+                	var svgWidth = 960;
+					var svgHeight = 600;
+					var widthAdjustment = 700;
+					var margin = { top: 20, right: 40, bottom: 100, left: 100 };
+					var width = svgWidth - margin.left - margin.right;
+					var height = svgHeight - margin.top - margin.bottom;
+
+					var place1 = "U.S. Service School";
+					var place2 = "New England";
+					var place3 = "Mid East";
+					var place4 = "Great Lakes";
+					var place5 = "Plains";
+					var place6 = "Southeast";
+					var place7 = "Far West";
+					var place8 = "Rocky Mountains";
+					var place9 = "Southwest";
+					var place10 = "Outlying Areas";
+
+
+					var svg = d3.select(".chart")
+						.append("svg")
+						.attr("width", svgWidth)
+						.attr("height", svgHeight)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+					var chart = svg.append("g");
+
+					d3.select(".chart")
+						.append("div")
+						.attr("class", "tooltip")
+						.style("opacity", 0);
+
+
+                	d3.json("/schools"+year, function(err, data) {
+                		if (err) throw err;
+                			i = 1;
+
+	                		for (var key in data){
+
+	                			//Initial
+	                			regionIntake = data[key].Region_Name;
+	                			SATval = +data[key].SAT_Avg;
+	                			admRate = +data[key].Admission_Rate;
+	                			testVal = [SATval,admRate];
+
+	                			switch(regionIntake) {
+								    case place1:
+								        regionIntake = 1;
+								        break;
+								    case place7:
+								        regionIntake = 7;
+								        break;
+								    case place6:
+								    	regionIntake = 6;
+								    	break;
+								   	case place8:
+								   		regionIntake = 8;
+								   		break;
+								   	case place5:
+								   		regionIntake = 5;
+								   		break;
+								   	case place10:
+								   		regionIntake = 10;
+								   		break;
+								   	case place2:
+								   		regionIntake = 2;
+								   		break;
+								   	case place3:
+								   		regionIntake = 3;
+								   		break;
+								   	case place4:
+								   		regionIntake = 4;
+								   		break;
+								   	case place9:
+								   		regionIntake = 9;
+								   		break;
+								    default:
+								        console.log("Error");	
+								}
+
+
+	                			if (i <= topSAT && regionIntake == regionSelect) {
+
+	                				instName = key;
+
+									circle = svg.selectAll("circle")
+										.data(testVal, function(d) { return d; });
+
+									circle.enter().append("circle")
+										.attr("cy", (1600-SATval)/3)
+										.attr("cx", admRate*widthAdjustment)
+										.attr("r", 10)
+								 		.attr("fill","lightblue")
+  										.attr("fill-opacity", .6)
+  										.attr("ID", instName)
+  										.on("mouseover", function(data, index) {
+											d3.select(this).each(function(d){accOutput = d});
+
+											d3.json("/schools"+year, function(data) {
+
+											for (var val in data){
+												regionIntake = data[val].Region_Name;
+
+				                				switch(regionIntake) {
+												    case place1:
+												        regionIntake = 1;
+												        break;
+												    case place7:
+												        regionIntake = 7;
+												        break;
+												    case place6:
+												    	regionIntake = 6;
+												    	break;
+												   	case place8:
+												   		regionIntake = 8;
+												   		break;
+												   	case place5:
+												   		regionIntake = 5;
+												   		break;
+												   	case place10:
+												   		regionIntake = 10;
+												   		break;
+												   	case place2:
+												   		regionIntake = 2;
+												   		break;
+												   	case place3:
+												   		regionIntake = 3;
+												   		break;
+												   	case place4:
+												   		regionIntake = 4;
+												   		break;
+												   	case place9:
+												   		regionIntake = 9;
+												   		break;
+												    default:
+												        console.log("Error");	
+												}
+
+												if (regionIntake == regionSelect) {
+													if (accOutput == data[val].Admission_Rate) {
+														school2 = data[val].Institution_Name;
+														SAT2 = data[val].SAT_Avg;
+
+
+														outputString = "Institution Name: " + school2 + "<br>Acceptance Rate: " + percentAdd(accOutput) + "<br>SAT Score: " +SAT2;
+
+														break;
+													}
+												}
+
+											}
+										});
+
+										}).on("click", function(data, index) {
+											toolTip.show(data);
+										}).on("mouseout", function(data, index) {
+											toolTip.hide(data);
+										});
+
+
+
+									toolTip = d3.tip()
+									    .attr("class", "tooltip")
+									    .offset([-10, 0])
+									    .html(function(data) {
+										return (outputString);
+								    });
+
+									chart.call(toolTip);
+
+									i++;
+								}
+							}
+						});
+
+                	var yLinearScale = d3.scaleLinear()
+						.range([480, 0])
+						.domain([0,1600]);
+					var xLinearScale = d3.scaleLinear()
+						.range([0, widthAdjustment]);
+
+					var bottomAxis = d3.axisBottom(xLinearScale);
+					var leftAxis = d3.axisLeft(yLinearScale);
+
+
+					chart.append("g")
+						.attr("transform", `translate(0, ${height})`)
+						.call(bottomAxis);
+
+					chart.append("g")
+						.call(leftAxis);
+
+					chart.append("text")
+						.attr("transform", "rotate(-90)")
+						.attr("y", 0 - margin.left + 40)
+						.attr("x", 0 - (height / 2))
+						.attr("dy", "1em")
+						.attr("class", "axisText")
+						.text("Adverage SAT Scores");
+
+					chart.append("text")
+						.attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 30) + ")")
+						.attr("class", "axisText")
+						.text("Admission Rate");
+
+
+                	var slider1 = document.getElementById("myRange1");
+					var outputYear = document.getElementById("demo1");
+					outputYear.innerHTML = slider1.value;
+
+					svg.selectAll("circle").remove();
+
+					slider1.oninput = function() {
+						outputYear.innerHTML = this.value;
+						year = this.value;
+						console.log(year);
+					
+						d3.json("/schools"+year, function(err, data) {
+                		if (err) throw err;
+                			i = 1;
+                			svg.selectAll("circle").remove();
+
+	                		for (var key in data){
+
+	                			//Year Update
+	                			regionIntake = data[key].Region_Name;
+	                			SATval = +data[key].SAT_Avg;
+	                			admRate = +data[key].Admission_Rate;
+	                			testVal = [SATval,admRate];
+
+	                			switch(regionIntake) {
+								    case place1:
+								        regionIntake = 1;
+								        break;
+								    case place7:
+								        regionIntake = 7;
+								        break;
+								    case place6:
+								    	regionIntake = 6;
+								    	break;
+								   	case place8:
+								   		regionIntake = 8;
+								   		break;
+								   	case place5:
+								   		regionIntake = 5;
+								   		break;
+								   	case place10:
+								   		regionIntake = 10;
+								   		break;
+								   	case place2:
+								   		regionIntake = 2;
+								   		break;
+								   	case place3:
+								   		regionIntake = 3;
+								   		break;
+								   	case place4:
+								   		regionIntake = 4;
+								   		break;
+								   	case place9:
+								   		regionIntake = 9;
+								   		break;
+								    default:
+								        console.log("Error");	
+								}
+
+
+	                			if (i <= topSAT && regionIntake == regionSelect) {
+
+	                				instName = key;
+
+									circle = svg.selectAll("circle")
+										.data(testVal, function(d) { return d; });
+
+									circle.enter().append("circle")
+										.attr("cy", (1600-SATval)/3)
+										.attr("cx", admRate*widthAdjustment)
+										.attr("r", 10)
+								 		.attr("fill","lightblue")
+  										.attr("fill-opacity", .6)
+  										.attr("ID", instName)
+  										.on("mouseover", function(data, index) {
+											d3.select(this).each(function(d){accOutput = d});
+
+											d3.json("/schools"+year, function(data) {
+
+											for (var val in data){
+												regionIntake = data[val].Region_Name;
+
+    				                			switch(regionIntake) {
+												    case place1:
+												        regionIntake = 1;
+												        break;
+												    case place7:
+												        regionIntake = 7;
+												        break;
+												    case place6:
+												    	regionIntake = 6;
+												    	break;
+												   	case place8:
+												   		regionIntake = 8;
+												   		break;
+												   	case place5:
+												   		regionIntake = 5;
+												   		break;
+												   	case place10:
+												   		regionIntake = 10;
+												   		break;
+												   	case place2:
+												   		regionIntake = 2;
+												   		break;
+												   	case place3:
+												   		regionIntake = 3;
+												   		break;
+												   	case place4:
+												   		regionIntake = 4;
+												   		break;
+												   	case place9:
+												   		regionIntake = 9;
+												   		break;
+												    default:
+												        console.log("Error");	
+												}
+
+												if (regionIntake == regionSelect) {
+													if (accOutput == data[val].Admission_Rate) {
+														school2 = data[val].Institution_Name;
+														SAT2 = data[val].SAT_Avg;
+
+														outputString = "Institution Name: " + school2 + "<br>Acceptance Rate: " + percentAdd(accOutput) + "<br>SAT Score: " +SAT2;
+														break;
+													}
+												}
+
+											}
+										});
+
+										}).on("click", function(data, index) {
+											toolTip.show(data);
+										}).on("mouseout", function(data, index) {
+											toolTip.hide(data);
+										});
+
+
+
+									toolTip = d3.tip()
+									    .attr("class", "tooltip")
+									    .offset([-10, 0])
+									    .html(function(data) {
+										return (outputString);
+								    });
+
+									chart.call(toolTip);
+
+									i++;
+								}
+							}
+						});
+                	}
+
+
+                	var slider2 = document.getElementById("myRange2");
+					var outputRegion = document.getElementById("demo2");
+					outputRegion.innerHTML = slider2.value;
+
+					slider2.oninput = function() {
+						var updateRegion = this.value;
+
+						if (updateRegion == 1) {
+							updateRegion = place1;
+						} else if (updateRegion == 2) {
+							updateRegion = place2;
+						} else if (updateRegion == 3) {
+							updateRegion = place3;
+						} else if (updateRegion == 4) {
+							updateRegion = place4;
+						} else if (updateRegion == 5) {
+							updateRegion = place5;
+						} else if (updateRegion == 6) {
+							updateRegion = place6;
+						} else if (updateRegion == 7) {
+							updateRegion = place7;
+						} else if (updateRegion == 8) {
+							updateRegion = place8;
+						} else if (updateRegion == 9) {
+							updateRegion = place9;
+						} else if (updateRegion == 10 ) {
+							updateRegion = place10;
+						}
+
+						 outputRegion.innerHTML = updateRegion;
+						regionSelect = this.value;
+						console.log(regionSelect);
+					
+						d3.json("/schools"+year, function(err, data) {
+                		if (err) throw err;
+                			i = 1;
+                			svg.selectAll("circle").remove();
+
+	                		for (var key in data){
+
+	                			//Region Update
+	                			regionIntake = data[key].Region_Name;
+	                			SATval = +data[key].SAT_Avg;
+	                			admRate = +data[key].Admission_Rate;
+	                			testVal = [SATval,admRate];
+
+	                			switch(regionIntake) {
+								    case place1:
+								        regionIntake = 1;
+								        break;
+								    case place7:
+								        regionIntake = 7;
+								        break;
+								    case place6:
+								    	regionIntake = 6;
+								    	break;
+								   	case place8:
+								   		regionIntake = 8;
+								   		break;
+								   	case place5:
+								   		regionIntake = 5;
+								   		break;
+								   	case place10:
+								   		regionIntake = 10;
+								   		break;
+								   	case place2:
+								   		regionIntake = 2;
+								   		break;
+								   	case place3:
+								   		regionIntake = 3;
+								   		break;
+								   	case place4:
+								   		regionIntake = 4;
+								   		break;
+								   	case place9:
+								   		regionIntake = 9;
+								   		break;
+								    default:
+								        console.log("Error");	
+								}
+
+
+	                			if (i <= topSAT && regionIntake == regionSelect) {
+
+	                				instName = key;
+
+									circle = svg.selectAll("circle")
+										.data(testVal, function(d) { return d; });
+
+									circle.enter().append("circle")
+										.attr("cy", (1600-SATval)/3)
+										.attr("cx", admRate*widthAdjustment)
+										.attr("r", 10)
+								 		.attr("fill","lightblue")
+  										.attr("fill-opacity", .6)
+  										.attr("ID", instName)
+  										.on("mouseover", function(data, index) {
+											d3.select(this).each(function(d){accOutput = d});
+
+											d3.json("/schools"+year, function(data) {
+
+											for (var val in data){
+												regionIntake = data[val].Region_Name;
+
+    				                			switch(regionIntake) {
+												    case place1:
+												        regionIntake = 1;
+												        break;
+												    case place7:
+												        regionIntake = 7;
+												        break;
+												    case place6:
+												    	regionIntake = 6;
+												    	break;
+												   	case place8:
+												   		regionIntake = 8;
+												   		break;
+												   	case place5:
+												   		regionIntake = 5;
+												   		break;
+												   	case place10:
+												   		regionIntake = 10;
+												   		break;
+												   	case place2:
+												   		regionIntake = 2;
+												   		break;
+												   	case place3:
+												   		regionIntake = 3;
+												   		break;
+												   	case place4:
+												   		regionIntake = 4;
+												   		break;
+												   	case place9:
+												   		regionIntake = 9;
+												   		break;
+												    default:
+												        console.log("Error");	
+												}
+
+												if (regionIntake == regionSelect) {
+													if (accOutput == data[val].Admission_Rate) {
+														school2 = data[val].Institution_Name;
+														SAT2 = data[val].SAT_Avg;
+
+														outputString = "Institution Name: " + school2 + "<br>Acceptance Rate: " + percentAdd(accOutput) + "<br>SAT Score: " +SAT2;
+
+														break;
+													}
+												}
+
+											}
+										});
+
+										}).on("click", function(data, index) {
+											toolTip.show(data);
+										}).on("mouseout", function(data, index) {
+											toolTip.hide(data);
+										});
+
+
+
+									toolTip = d3.tip()
+									    .attr("class", "tooltip")
+									    .offset([-10, 0])
+									    .html(function(data) {
+										return (outputString);
+								    });
+
+									chart.call(toolTip);
+
+									i++;
+								}
+							}
+						});
+                	}
+
+
+
+                	var slider3 = document.getElementById("myRange3");
+					var outputTop = document.getElementById("demo3");
+					outputTop.innerHTML = slider3.value;
+
+					slider3.oninput = function() {
+						outputTop.innerHTML = this.value;
+						topSAT = this.value;
+						console.log(topSAT);
+
+	                	d3.json("/schools"+year, function(err, data) {
+                		if (err) throw err;
+                			i = 1;
+                			svg.selectAll("circle").remove();
+
+	                		for (var key in data){
+
+	                			//Top Update
+	                			regionIntake = data[key].Region_Name;
+	                			SATval = +data[key].SAT_Avg;
+	                			admRate = +data[key].Admission_Rate;
+	                			testVal = [SATval,admRate];
+
+	                			switch(regionIntake) {
+								    case place1:
+								        regionIntake = 1;
+								        break;
+								    case place7:
+								        regionIntake = 7;
+								        break;
+								    case place6:
+								    	regionIntake = 6;
+								    	break;
+								   	case place8:
+								   		regionIntake = 8;
+								   		break;
+								   	case place5:
+								   		regionIntake = 5;
+								   		break;
+								   	case place10:
+								   		regionIntake = 10;
+								   		break;
+								   	case place2:
+								   		regionIntake = 2;
+								   		break;
+								   	case place3:
+								   		regionIntake = 3;
+								   		break;
+								   	case place4:
+								   		regionIntake = 4;
+								   		break;
+								   	case place9:
+								   		regionIntake = 9;
+								   		break;
+								    default:
+								        console.log("Error");	
+								}
+
+
+	                			if (i <= topSAT && regionIntake == regionSelect) {
+
+	                				instName = key;
+
+									circle = svg.selectAll("circle")
+										.data(testVal, function(d) { return d; });
+
+									circle.enter().append("circle")
+										.attr("cy", (1600-SATval)/3)
+										.attr("cx", admRate*widthAdjustment)
+										.attr("r", 10)
+								 		.attr("fill","lightblue")
+  										.attr("fill-opacity", .6)
+  										.attr("ID", instName)
+  										.on("mouseover", function(data, index) {
+											d3.select(this).each(function(d){accOutput = d});
+
+											d3.json("/schools"+year, function(data) {
+
+											for (var val in data){
+												regionIntake = data[val].Region_Name;
+
+				                				switch(regionIntake) {
+												    case place1:
+												        regionIntake = 1;
+												        break;
+												    case place7:
+												        regionIntake = 7;
+												        break;
+												    case place6:
+												    	regionIntake = 6;
+												    	break;
+												   	case place8:
+												   		regionIntake = 8;
+												   		break;
+												   	case place5:
+												   		regionIntake = 5;
+												   		break;
+												   	case place10:
+												   		regionIntake = 10;
+												   		break;
+												   	case place2:
+												   		regionIntake = 2;
+												   		break;
+												   	case place3:
+												   		regionIntake = 3;
+												   		break;
+												   	case place4:
+												   		regionIntake = 4;
+												   		break;
+												   	case place9:
+												   		regionIntake = 9;
+												   		break;
+												    default:
+												        console.log("Error");	
+												}
+												if (regionIntake == regionSelect) {
+													if (accOutput == data[val].Admission_Rate) {
+														school2 = data[val].Institution_Name;
+														SAT2 = data[val].SAT_Avg;
+
+														outputString = "Institution Name: " + school2 + "<br>Acceptance Rate: " + percentAdd(accOutput) + "<br>SAT Score: " +SAT2;
+														break;
+													}
+												}
+
+											}
+										});
+
+										}).on("click", function(data, index) {
+											toolTip.show(data);
+										}).on("mouseout", function(data, index) {
+											toolTip.hide(data);
+										});
+
+
+
+									toolTip = d3.tip()
+									    .attr("class", "tooltip")
+									    .offset([-10, 0])
+									    .html(function(data) {
+										return (outputString);
+								    });
+
+									chart.call(toolTip);
+
+									i++;
+								}
+							}
+						});
+                	}
+
+                	function percentAdd(num) {
+                		var fix = num *100;
+  						return fix.toFixed(1) + "%";
+                	}
+
+                </script>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
